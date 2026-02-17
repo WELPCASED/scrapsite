@@ -1,0 +1,10 @@
+{
+  "deviceQuestion": "What device are you using?",
+  "offerDescription": "Complete this offer to unlock your item",
+  "offerButtonText": "Complete Offer",
+  "timerDuration": 40,
+  "unlockTitle": "Content unlocked!",
+  "rewardLabel": "Your Reward",
+  "rewardButtonName": "Get Your Reward",
+  "rewardButtonLink": "https://example.com/reward"
+}
