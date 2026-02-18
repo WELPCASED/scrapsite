@@ -3,154 +3,1209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Debug</title>
+    <title>Scrapto - Admin Panel</title>
     <style>
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
-            max-width: 500px;
-            margin: 50px auto;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* LOGIN SCREEN */
+        #loginScreen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             padding: 20px;
-            background: #f5f5f5;
         }
-        .box {
+        .login-card {
             background: white;
-            padding: 30px;
+            border-radius: 20px;
+            padding: 3rem;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        .login-card h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        .login-card p {
+            color: #718096;
+            margin-bottom: 2rem;
+        }
+        .login-input {
+            width: 100%;
+            padding: 1rem 1.2rem;
+            border: 2px solid #e2e8f0;
             border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
         }
-        h1 { margin-bottom: 20px; }
-        input {
+        .login-input:focus { border-color: #667eea; }
+        .login-btn {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            margin-bottom: 15px;
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-bottom: 1rem;
         }
-        button {
-            width: 100%;
-            padding: 12px;
+        .login-error {
+            color: #e53e3e;
+            font-size: 0.9rem;
+            display: none;
+            margin-top: 0.5rem;
+        }
+        .login-help {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: #f7fafc;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            color: #718096;
+            text-align: left;
+        }
+        #adminScreen { display: none; }
+        .saving-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #667eea;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            display: none;
+            z-index: 9999;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 3px solid #e2e8f0;
+        }
+
+        .admin-title {
+            font-size: 2.2rem;
+            color: #1a202c;
+            font-weight: 800;
+        }
+
+        .home-btn {
+            padding: 0.75rem 1.5rem;
             background: #667eea;
             color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 1rem;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .home-btn:active {
+            background: #5568d3;
+            transform: scale(0.95);
+        }
+
+        .admin-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2.5rem;
+            border-bottom: 3px solid #e2e8f0;
+            flex-wrap: wrap;
+        }
+
+        .admin-tab {
+            padding: 1rem 1.8rem;
+            background: transparent;
+            border: none;
+            border-bottom: 4px solid transparent;
+            cursor: pointer;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #718096;
+            transition: all 0.3s;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .admin-tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            background: #f7fafc;
+        }
+
+        .admin-tab:active {
+            color: #667eea;
+            background: #f7fafc;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .add-item-btn {
+            width: 100%;
+            padding: 1.2rem;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            transition: all 0.3s;
         }
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+
+        .add-item-btn:active {
+            transform: scale(0.98);
         }
-        .log {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f9f9f9;
+
+        .item-editor {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            animation: slideIn 0.3s ease;
+            transition: all 0.3s;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .editor-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1a202c;
+        }
+
+        .delete-item-btn {
+            padding: 0.6rem 1.2rem;
+            background: #e53e3e;
+            color: white;
+            border: none;
             border-radius: 8px;
-            font-family: monospace;
-            font-size: 12px;
-            max-height: 300px;
-            overflow-y: auto;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.3s;
         }
-        .log div {
-            margin: 5px 0;
-            padding: 5px;
-            border-left: 3px solid #667eea;
-            padding-left: 10px;
+
+        .delete-item-btn:active {
+            background: #c53030;
+            transform: scale(0.95);
         }
-        .error { border-left-color: #e53e3e !important; color: #e53e3e; }
-        .success { border-left-color: #48bb78 !important; color: #48bb78; }
+
+        .form-group {
+            margin-bottom: 1.3rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.6rem;
+            color: #4a5568;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .photo-upload-container {
+            border: 2px dashed #cbd5e0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            background: white;
+            position: relative;
+            min-height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .photo-upload-btn {
+            width: 100px;
+            height: 100px;
+            background: #edf2f7;
+            border: 2px solid #cbd5e0;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: #a0aec0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .photo-upload-btn:active {
+            background: #e2e8f0;
+            border-color: #667eea;
+            color: #667eea;
+            transform: scale(0.95);
+        }
+
+        .photo-preview {
+            max-width: 100%;
+            max-height: 140px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .photo-remove {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: #e53e3e;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .photo-remove:active {
+            background: #c53030;
+            transform: scale(0.9);
+        }
+
+        .save-all-btn {
+            width: 100%;
+            padding: 1.2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.15rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 2rem;
+            transition: all 0.3s;
+        }
+
+        .save-all-btn:active {
+            transform: scale(0.98);
+        }
+
+        .success-toast {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: #48bb78;
+            color: white;
+            padding: 1.2rem 2rem;
+            border-radius: 12px;
+            box-shadow: 0 6px 25px rgba(72, 187, 120, 0.4);
+            z-index: 10000;
+            animation: slideInRight 0.3s ease;
+            display: none;
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+
+        .success-toast.active {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .confirm-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .confirm-modal.active {
+            display: flex;
+        }
+
+        .confirm-box {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            max-width: 400px;
+            width: 90%;
+            animation: slideUp 0.3s ease;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .confirm-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .confirm-message {
+            font-size: 1.1rem;
+            color: #4a5568;
+            margin-bottom: 2rem;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .confirm-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .confirm-yes, .confirm-no {
+            padding: 1rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .confirm-yes {
+            background: #e53e3e;
+            color: white;
+        }
+
+        .confirm-yes:active {
+            background: #c53030;
+            transform: scale(0.95);
+        }
+
+        .confirm-no {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .confirm-no:active {
+            background: #cbd5e0;
+            transform: scale(0.95);
+        }
+
+        @media (max-width: 600px) {
+            .admin-container {
+                padding: 1.8rem;
+            }
+
+            .admin-tabs {
+                overflow-x: auto;
+                flex-wrap: nowrap;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="box">
-        <h1>🔍 Admin Debug</h1>
-        <input type="password" id="token" placeholder="Paste your GitHub token (ghp_...)">
-        <button id="testBtn" onclick="testLogin()">Test Login</button>
-        <div class="log" id="log"></div>
+
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen">
+        <div class="login-card">
+            <h1>🎁 Scrapto</h1>
+            <p>Admin Panel - Enter your GitHub Token to login</p>
+            <input type="password" class="login-input" id="tokenInput" placeholder="GitHub Personal Access Token" />
+            <button class="login-btn" onclick="handleLogin()">🔐 Login</button>
+            <div class="login-error" id="loginError">❌ Invalid token or no access to repository</div>
+            <div class="login-help">
+                <strong>How to get your token:</strong><br>
+                1. Go to GitHub → Settings → Developer settings<br>
+                2. Personal access tokens → Tokens (classic)<br>
+                3. Generate new token → Select "repo" scope<br>
+                4. Copy and paste the token here
+            </div>
+        </div>
+    </div>
+
+    <!-- SAVING INDICATOR -->
+    <div class="saving-indicator" id="savingIndicator">💾 Saving to GitHub...</div>
+
+    <!-- ADMIN SCREEN -->
+    <div id="adminScreen" style="display:none;">
+    <div class="confirm-modal" id="confirmModal">
+        <div class="confirm-box">
+            <div class="confirm-title" id="confirmTitle">⚠️ Confirm Action</div>
+            <div class="confirm-message" id="confirmMessage">Are you sure?</div>
+            <div class="confirm-buttons">
+                <button class="confirm-no" id="confirmNo">Cancel</button>
+                <button class="confirm-yes" id="confirmYes">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="success-toast" id="successToast">
+        <span>✅</span>
+        <span id="toastMessage">Changes saved successfully!</span>
+    </div>
+
+    <div class="admin-container">
+        <div class="admin-header">
+            <h2 class="admin-title">🛠️ Admin Panel</h2>
+            <a href="index.html" class="home-btn">🏠 Back to Site</a>
+        </div>
+
+        <div class="admin-tabs">
+            <button class="admin-tab active" data-tab="items">📦 Items</button>
+            <button class="admin-tab" data-tab="devices">📱 Devices</button>
+            <button class="admin-tab" data-tab="offers">🎁 Offers</button>
+            <button class="admin-tab" data-tab="rewards">🏆 Rewards</button>
+            <button class="admin-tab" data-tab="analytics">📊 Analytics</button>
+        </div>
+
+        <div id="itemsTab" class="tab-content active">
+            <button class="add-item-btn" id="addItemBtn">➕ Add New Item</button>
+            <div id="itemEditors"></div>
+        </div>
+
+        <div id="devicesTab" class="tab-content">
+            <h3 style="margin-bottom: 1.5rem; color: #1a202c; font-size: 1.3rem;">Customize Device Selection Screen</h3>
+            <div class="item-editor">
+                <div class="form-group">
+                    <label class="form-label">Question Text</label>
+                    <input type="text" class="form-input" id="deviceQuestionInput" value="What device are you using?">
+                </div>
+                <div id="deviceEditors"></div>
+                <button class="add-item-btn" id="addDeviceBtn">➕ Add Device Option</button>
+            </div>
+        </div>
+
+        <div id="offersTab" class="tab-content">
+            <h3 style="margin-bottom: 1.5rem; color: #1a202c; font-size: 1.3rem;">Customize Offer Screen</h3>
+            <div class="item-editor">
+                <div class="form-group">
+                    <label class="form-label">Offer Description</label>
+                    <input type="text" class="form-input" id="offerDescriptionInput" value="Complete this offer to unlock your item">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Button Text</label>
+                    <input type="text" class="form-input" id="offerButtonTextInput" value="Complete Offer">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Timer Duration (seconds)</label>
+                    <input type="number" class="form-input" id="timerDurationInput" value="40" min="5" max="300">
+                </div>
+            </div>
+        </div>
+
+        <div id="rewardsTab" class="tab-content">
+            <h3 style="margin-bottom: 1.5rem; color: #1a202c; font-size: 1.3rem;">Customize Reward Screen</h3>
+            <div class="item-editor">
+                <div class="form-group">
+                    <label class="form-label">Unlock Title</label>
+                    <input type="text" class="form-input" id="unlockTitleInput" value="Content unlocked!">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Reward Label</label>
+                    <input type="text" class="form-input" id="rewardLabelInput" value="Your Reward">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Reward Button Name</label>
+                    <input type="text" class="form-input" id="rewardButtonNameInput" value="Get Your Reward">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Reward Button Link (URL)</label>
+                    <input type="text" class="form-input" id="rewardButtonLinkInput" value="https://example.com/reward"
+                        placeholder="https://example.com/your-link">
+                </div>
+            </div>
+        </div>
+
+        <div id="analyticsTab" class="tab-content">
+            <h3 style="margin-bottom: 1.5rem; color: #1a202c; font-size: 1.3rem;">📊 Analytics & Statistics</h3>
+            <div style="margin-bottom: 2rem; padding: 1.5rem; background: #f7fafc; border-radius: 12px; border: 2px solid #e2e8f0;">
+                <div style="text-align: center; margin-bottom: 1rem;">
+                    <div style="font-size: 0.95rem; color: #718096; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 0.5rem;">
+                        Total Views Across All Items
+                    </div>
+                    <div style="font-size: 3rem; font-weight: 800; color: #667eea;" id="totalViewsDisplay">
+                        0
+                    </div>
+                </div>
+            </div>
+            <div id="itemAnalytics"></div>
+        </div>
+
+        <button class="save-all-btn" id="saveAllBtn">💾 Save All Changes</button>
     </div>
 
     <script>
-        const REPO = 'WELPCASED/scrapsite';
-        
-        function log(msg, type = 'info') {
-            const div = document.createElement('div');
-            div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
-            if (type === 'error') div.className = 'error';
-            if (type === 'success') div.className = 'success';
-            document.getElementById('log').appendChild(div);
-            document.getElementById('log').scrollTop = document.getElementById('log').scrollHeight;
+        let items = [];
+        let devices = [];
+        let appSettings = {};
+        let confirmCallback = null;
+
+        function showConfirm(title, message, callback) {
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmMessage').textContent = message;
+            confirmCallback = callback;
+            document.getElementById('confirmModal').classList.add('active');
         }
 
-        async function testLogin() {
-            const token = document.getElementById('token').value.trim();
-            const btn = document.getElementById('testBtn');
-            
-            document.getElementById('log').innerHTML = '';
-            
-            log('Starting test...');
+        // GitHub API Configuration
+        const GITHUB_REPO = 'WELPCASED/scrapsite';
+        const GITHUB_BRANCH = 'main';
+        let GITHUB_TOKEN = '';
+
+        // Login Handler
+        async function handleLogin() {
+            const token = document.getElementById('tokenInput').value.trim();
+            const btn = document.getElementById('loginBtn');
+            const errEl = document.getElementById('loginError');
             
             if (!token) {
-                log('ERROR: No token provided', 'error');
+                errEl.textContent = '❌ Please enter a token';
+                errEl.style.display = 'block';
                 return;
             }
             
-            if (!token.startsWith('ghp_')) {
-                log('WARNING: Token should start with ghp_', 'error');
-            }
-            
-            log(`Token length: ${token.length} characters`);
-            log(`Testing access to: ${REPO}`);
-            
+            btn.textContent = '⏳ Verifying...';
             btn.disabled = true;
-            btn.textContent = 'Testing...';
+            errEl.style.display = 'none';
             
             try {
-                log('Sending request to GitHub API...');
-                
-                const response = await fetch(`https://api.github.com/repos/${REPO}`, {
-                    headers: {
-                        'Authorization': `token ${token}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
+                // Test the token by fetching repo info
+                const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}`, {
+                    headers: { 'Authorization': `token ${token}` }
                 });
                 
-                log(`Response status: ${response.status} ${response.statusText}`);
-                log(`Rate limit remaining: ${response.headers.get('x-ratelimit-remaining')}`);
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    log(`✅ SUCCESS! Repo found: ${data.full_name}`, 'success');
-                    log(`Repo is: ${data.private ? 'Private' : 'Public'}`, 'success');
-                    log(`Your permissions: ${JSON.stringify(data.permissions)}`, 'success');
-                    log('', 'success');
-                    log('🎉 TOKEN IS VALID! You can use the real admin panel now.', 'success');
-                } else {
-                    const errorData = await response.json().catch(() => ({}));
-                    log(`❌ FAILED: ${errorData.message || 'Unknown error'}`, 'error');
-                    
-                    if (response.status === 401) {
-                        log('Token is invalid or expired', 'error');
-                    } else if (response.status === 404) {
-                        log('Repository not found or token lacks access', 'error');
-                    } else if (response.status === 403) {
-                        log('Token lacks required permissions (needs "repo" scope)', 'error');
-                    }
+                if (!response.ok) {
+                    const data = await response.json().catch(() => ({}));
+                    throw new Error(data.message || 'Invalid token or no repo access');
                 }
                 
-            } catch (err) {
-                log(`❌ ERROR: ${err.message}`, 'error');
-                log('This might be a network/CORS issue', 'error');
+                GITHUB_TOKEN = token;
+                sessionStorage.setItem('github_token', token);
+                
+                // Show admin screen first
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('adminScreen').style.display = 'block';
+                
+                try { document.getElementById('repoBadge').textContent = GITHUB_REPO; } catch(e) { console.error('Badge:', e); }
+                
+                try { await loadFromGitHub(); } catch(e) { console.error('Load:', e); alert('Failed to load data: ' + e.message); }
+                try { renderAdminItems(); } catch(e) { console.error('Items:', e); }
+                try { renderAdminDevices(); } catch(e) { console.error('Devices:', e); }
+                try { updateViewsDisplay(); } catch(e) { console.error('Views:', e); }
+                try { populateSettings(); } catch(e) { console.error('Settings:', e); }
+                try { setupEventListeners(); } catch(e) { console.error('Events:', e); }
+                
+            } catch(e) {
+                console.error('Login error:', e);
+                errEl.textContent = '❌ ' + (e.message || 'Login failed');
+                errEl.style.display = 'block';
+                btn.textContent = '🔐 Login';
+                btn.disabled = false;
+            }
+        }
+
+        // Allow Enter key on token input
+        document.addEventListener('DOMContentLoaded', () => {
+            const tokenInput = document.getElementById('tokenInput');
+            if (tokenInput) {
+                tokenInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') handleLogin();
+                });
+            }
+            // Auto-login if token saved in session
+            const savedToken = sessionStorage.getItem('github_token');
+            if (savedToken) {
+                document.getElementById('tokenInput').value = savedToken;
+                handleLogin();
+            }
+        });
+
+        // GitHub API helper - get file with SHA
+        async function getGithubFile(path) {
+            const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${path}?ref=${GITHUB_BRANCH}`, {
+                headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+            });
+            if (!response.ok) return null;
+            return await response.json();
+        }
+
+        // GitHub API helper - save file
+        async function saveGithubFile(path, content, message) {
+            const existing = await getGithubFile(path);
+            const body = {
+                message: message,
+                content: btoa(unescape(encodeURIComponent(content))),
+                branch: GITHUB_BRANCH
+            };
+            if (existing) body.sha = existing.sha;
+            
+            const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${path}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${GITHUB_TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(body)
+            });
+            return response.ok;
+        }
+
+        // Convert item to markdown
+        function itemToMarkdown(item) {
+            return `---\ntitle: "${item.title}"\ndescription: "${item.description}"\nphoto: "${item.photo || ''}"\nreward: "${item.reward}"\nviews: ${item.views || 0}\n---\n`;
+        }
+
+        // Convert device to markdown
+        function deviceToMarkdown(device) {
+            return `---\nname: "${device.name}"\nlink: "${device.link}"\n---\n`;
+        }
+
+        // Parse markdown frontmatter
+        function parseMarkdown(content) {
+            const match = content.match(/^---\n([\s\S]*?)\n---/);
+            if (!match) return {};
+            const data = {};
+            match[1].split('\n').forEach(line => {
+                const colonIndex = line.indexOf(':');
+                if (colonIndex > -1) {
+                    const key = line.substring(0, colonIndex).trim();
+                    let value = line.substring(colonIndex + 1).trim();
+                    value = value.replace(/^["']|["']$/g, '');
+                    if (!isNaN(value) && value !== '') value = Number(value);
+                    data[key] = value;
+                }
+            });
+            return data;
+        }
+
+        // Load all data from GitHub
+        async function loadFromGitHub() {
+            try {
+                // Load items
+                const itemsDir = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/_items?ref=${GITHUB_BRANCH}`, {
+                    headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+                });
+                if (itemsDir.ok) {
+                    const itemFiles = await itemsDir.json();
+                    items = [];
+                    for (const file of itemFiles) {
+                        if (file.name.endsWith('.md')) {
+                            const fileData = await fetch(file.download_url);
+                            const content = await fileData.text();
+                            const data = parseMarkdown(content);
+                            data.id = file.name.replace('.md', '');
+                            data._filename = file.name;
+                            items.push(data);
+                        }
+                    }
+                }
+
+                // Load devices
+                const devicesDir = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/_devices?ref=${GITHUB_BRANCH}`, {
+                    headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+                });
+                if (devicesDir.ok) {
+                    const deviceFiles = await devicesDir.json();
+                    devices = [];
+                    for (const file of deviceFiles) {
+                        if (file.name.endsWith('.md')) {
+                            const fileData = await fetch(file.download_url);
+                            const content = await fileData.text();
+                            const data = parseMarkdown(content);
+                            data.id = file.name.replace('.md', '');
+                            data._filename = file.name;
+                            devices.push(data);
+                        }
+                    }
+                }
+
+                // Load settings
+                const settingsFile = await getGithubFile('_data/settings.json');
+                if (settingsFile) {
+                    const content = atob(settingsFile.content.replace(/\n/g, ''));
+                    appSettings = JSON.parse(content);
+                }
+
+            } catch(e) {
+                console.error('Error loading from GitHub:', e);
+            }
+        }
+
+        // Save all data to GitHub
+        async function saveToStorage() {
+            const indicator = document.getElementById('savingIndicator');
+            indicator.style.display = 'block';
+            
+            try {
+                // Save items
+                for (const item of items) {
+                    const filename = item._filename || `${item.id || 'item-' + Date.now()}.md`;
+                    item._filename = filename;
+                    await saveGithubFile(`_items/${filename}`, itemToMarkdown(item), `Update item: ${item.title}`);
+                }
+
+                // Save devices
+                for (const device of devices) {
+                    const filename = device._filename || `${device.id || 'device-' + Date.now()}.md`;
+                    device._filename = filename;
+                    await saveGithubFile(`_devices/${filename}`, deviceToMarkdown(device), `Update device: ${device.name}`);
+                }
+
+                // Save settings
+                await saveGithubFile('_data/settings.json', JSON.stringify(appSettings, null, 2), 'Update settings');
+
+            } catch(e) {
+                console.error('Error saving to GitHub:', e);
             }
             
-            btn.disabled = false;
-            btn.textContent = 'Test Login';
+            indicator.style.display = 'none';
         }
-        
-        // Allow Enter key
-        document.getElementById('token').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') testLogin();
-        });
+
+        function loadFromStorage() {
+            // This is now handled by loadFromGitHub()
+            // Items/devices/settings are loaded after login
+        }
+
+        function showSuccessToast(message = 'Changes saved successfully!') {
+            const toast = document.getElementById('successToast');
+            const toastMessage = document.getElementById('toastMessage');
+            toastMessage.textContent = message;
+            toast.classList.add('active');
+            setTimeout(() => {
+                toast.classList.remove('active');
+            }, 3000);
+        }
+
+        function renderAdminItems() {
+            const container = document.getElementById('itemEditors');
+            container.innerHTML = '';
+            
+            items.forEach((item, index) => {
+                const editor = document.createElement('div');
+                editor.className = 'item-editor';
+                
+                editor.innerHTML = `
+                    <div class="editor-header">
+                        <div class="editor-title">Item ${index + 1}</div>
+                        <button type="button" class="delete-item-btn" data-index="${index}">🗑️ Delete</button>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Title</label>
+                        <input type="text" class="form-input" value="${item.title}" data-index="${index}" data-field="title">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <input type="text" class="form-input" value="${item.description}" data-index="${index}" data-field="description">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Reward Message</label>
+                        <input type="text" class="form-input" value="${item.reward}" data-index="${index}" data-field="reward">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Upload Photo</label>
+                        <div class="photo-upload-container">
+                            ${item.photo ? `
+                                <img src="${item.photo}" class="photo-preview" alt="Preview">
+                                <button type="button" class="photo-remove" data-index="${index}">✕</button>
+                            ` : `
+                                <label class="photo-upload-btn">
+                                    ➕
+                                    <input type="file" accept="image/*" style="display:none" data-index="${index}" class="photo-input">
+                                </label>
+                            `}
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(editor);
+            });
+
+            document.querySelectorAll('.delete-item-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.dataset.index);
+                    const itemTitle = items[index].title;
+                    showConfirm(
+                        '🗑️ Delete Item',
+                        `Delete "${itemTitle}"? This cannot be undone.`,
+                        (confirmed) => {
+                            if (confirmed) {
+                                items.splice(index, 1);
+                                // Delete from GitHub
+                                const filename = item._filename;
+                                if (filename && GITHUB_TOKEN) {
+                                    const existing = await getGithubFile(`_items/${filename}`);
+                                    if (existing) {
+                                        await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/_items/${filename}`, {
+                                            method: 'DELETE',
+                                            headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ message: `Delete item: ${item.title}`, sha: existing.sha, branch: GITHUB_BRANCH })
+                                        });
+                                    }
+                                }
+                                renderAdminItems();
+                                showSuccessToast('Item deleted!');
+                            }
+                        }
+                    );
+                });
+            });
+
+            document.querySelectorAll('.form-input[data-field]').forEach(input => {
+                input.addEventListener('input', function() {
+                    const index = parseInt(this.dataset.index);
+                    const field = this.dataset.field;
+                    items[index][field] = this.value;
+                });
+            });
+
+            document.querySelectorAll('.photo-input').forEach(input => {
+                input.addEventListener('change', function(e) {
+                    const index = parseInt(this.dataset.index);
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            items[index].photo = event.target.result;
+                            renderAdminItems();
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            });
+
+            document.querySelectorAll('.photo-remove').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.dataset.index);
+                    items[index].photo = '';
+                    renderAdminItems();
+                });
+            });
+        }
+
+        function renderAdminDevices() {
+            const container = document.getElementById('deviceEditors');
+            container.innerHTML = '';
+            
+            devices.forEach((device, index) => {
+                const editor = document.createElement('div');
+                editor.className = 'item-editor';
+                editor.style.marginBottom = '1rem';
+                
+                editor.innerHTML = `
+                    <div class="editor-header">
+                        <div class="editor-title">Device ${index + 1}</div>
+                        <button type="button" class="delete-item-btn" data-index="${index}">🗑️ Delete</button>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Device Name</label>
+                        <input type="text" class="form-input" value="${device.name}" data-index="${index}" data-field="name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Offer Link (URL)</label>
+                        <input type="text" class="form-input" value="${device.link}" data-index="${index}" data-field="link"
+                            placeholder="https://example.com/your-offer">
+                    </div>
+                `;
+                
+                container.appendChild(editor);
+            });
+
+            document.querySelectorAll('#deviceEditors .delete-item-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.dataset.index);
+                    const deviceName = devices[index].name;
+                    showConfirm(
+                        '🗑️ Delete Device',
+                        `Delete "${deviceName}"? This cannot be undone.`,
+                        (confirmed) => {
+                            if (confirmed) {
+                                devices.splice(index, 1);
+                                // Delete from GitHub
+                                const filename = device._filename;
+                                if (filename && GITHUB_TOKEN) {
+                                    const existing = await getGithubFile(`_devices/${filename}`);
+                                    if (existing) {
+                                        await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/_devices/${filename}`, {
+                                            method: 'DELETE',
+                                            headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ message: `Delete device: ${device.name}`, sha: existing.sha, branch: GITHUB_BRANCH })
+                                        });
+                                    }
+                                }
+                                renderAdminDevices();
+                                showSuccessToast('Device deleted!');
+                            }
+                        }
+                    );
+                });
+            });
+
+            document.querySelectorAll('#deviceEditors .form-input[data-field]').forEach(input => {
+                input.addEventListener('input', function() {
+                    const index = parseInt(this.dataset.index);
+                    const field = this.dataset.field;
+                    devices[index][field] = this.value;
+                });
+            });
+        }
+
+        function updateViewsDisplay() {
+            const totalViews = items.reduce((sum, item) => sum + (item.views || 0), 0);
+            const totalViewsDisplay = document.getElementById('totalViewsDisplay');
+            if (totalViewsDisplay) {
+                totalViewsDisplay.textContent = totalViews.toLocaleString();
+            }
+
+            const container = document.getElementById('itemAnalytics');
+            if (!container) return;
+
+            container.innerHTML = items.map(item => `
+                <div class="item-editor" style="margin-bottom: 1.2rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem;">
+                        <div style="flex: 1;">
+                            <div style="font-size: 1.2rem; font-weight: 700; color: #1a202c; margin-bottom: 0.3rem;">
+                                ${item.title}
+                            </div>
+                            <div style="font-size: 0.9rem; color: #718096;">
+                                ${item.description}
+                            </div>
+                        </div>
+                        <div style="text-align: center; margin: 0 2rem;">
+                            <div style="font-size: 0.75rem; color: #a0aec0; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.3rem;">
+                                Views
+                            </div>
+                            <div style="font-size: 2rem; font-weight: 800; color: #667eea;">
+                                ${(item.views || 0).toLocaleString()}
+                            </div>
+                        </div>
+                        <div>
+                            <button class="delete-item-btn reset-item-views" data-item-id="${item.id}" style="padding: 0.6rem 1rem; font-size: 0.9rem;">
+                                🔄 Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            document.querySelectorAll('.reset-item-views').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const itemId = this.dataset.itemId;
+                    const item = items.find(i => i.id === itemId);
+                    if (item) {
+                        showConfirm(
+                            '🔄 Reset Views',
+                            `Reset views for "${item.title}" to 0? This cannot be undone.`,
+                            (confirmed) => {
+                                if (confirmed) {
+                                    item.views = 0;
+                                    saveToStorage();
+                                    updateViewsDisplay();
+                                    showSuccessToast(`Views reset for ${item.title}!`);
+                                }
+                            }
+                        );
+                    }
+                });
+            });
+        }
+
+        function setupEventListeners() {
+            document.getElementById('confirmYes').addEventListener('click', function() {
+                document.getElementById('confirmModal').classList.remove('active');
+                if (confirmCallback) {
+                    confirmCallback(true);
+                    confirmCallback = null;
+                }
+            });
+
+            document.getElementById('confirmNo').addEventListener('click', function() {
+                document.getElementById('confirmModal').classList.remove('active');
+                if (confirmCallback) {
+                    confirmCallback(false);
+                    confirmCallback = null;
+                }
+            });
+
+            document.querySelectorAll('.admin-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    this.classList.add('active');
+                    const tabName = this.dataset.tab;
+                    document.getElementById(tabName + 'Tab').classList.add('active');
+                });
+            });
+
+            document.getElementById('addItemBtn').addEventListener('click', function() {
+                const newItem = {
+                    id: 'item_' + Date.now(),
+                    title: 'New Item',
+                    description: 'Add description here',
+                    photo: '',
+                    reward: 'Reward message here',
+                    views: 0
+                };
+                items.push(newItem);
+                renderAdminItems();
+                showSuccessToast('New item added!');
+            });
+
+            document.getElementById('addDeviceBtn').addEventListener('click', function() {
+                const newDevice = {
+                    id: 'device_' + Date.now(),
+                    name: 'New Device',
+                    link: 'https://example.com/offer'
+                };
+                devices.push(newDevice);
+                renderAdminDevices();
+                showSuccessToast('New device added!');
+            });
+
+            document.getElementById('saveAllBtn').addEventListener('click', function() {
+                appSettings.deviceQuestion = document.getElementById('deviceQuestionInput').value;
+                appSettings.offerDescription = document.getElementById('offerDescriptionInput').value;
+                appSettings.offerButtonText = document.getElementById('offerButtonTextInput').value;
+                appSettings.timerDuration = parseInt(document.getElementById('timerDurationInput').value);
+                appSettings.unlockTitle = document.getElementById('unlockTitleInput').value;
+                appSettings.rewardLabel = document.getElementById('rewardLabelInput').value;
+                appSettings.rewardButtonName = document.getElementById('rewardButtonNameInput').value;
+                appSettings.rewardButtonLink = document.getElementById('rewardButtonLinkInput').value;
+                
+                saveToStorage();
+                showSuccessToast('All changes saved successfully!');
+            });
+        }
+
+        function init() {
+            // Init is now called after login
+            // See handleLogin() above
+        }
+
+        // Don't auto-init - wait for login
+        // init();
     </script>
+    </div><!-- end adminScreen -->
 </body>
 </html>
