@@ -670,9 +670,18 @@
         // Login Handler
         async function handleLogin() {
             const token = document.getElementById('tokenInput').value.trim();
-            if (!token) return;
+            const btn = document.getElementById('loginBtn');
+            const errEl = document.getElementById('loginError');
             
-            document.getElementById('loginError').style.display = 'none';
+            if (!token) {
+                errEl.textContent = '❌ Please enter a token';
+                errEl.style.display = 'block';
+                return;
+            }
+            
+            btn.textContent = '⏳ Verifying...';
+            btn.disabled = true;
+            errEl.style.display = 'none';
             
             try {
                 // Test the token by fetching repo info
@@ -680,32 +689,31 @@
                     headers: { 'Authorization': `token ${token}` }
                 });
                 
-                if (!response.ok) throw new Error('Invalid token');
+                if (!response.ok) {
+                    const data = await response.json().catch(() => ({}));
+                    throw new Error(data.message || 'Invalid token or no repo access');
+                }
                 
                 GITHUB_TOKEN = token;
                 sessionStorage.setItem('github_token', token);
                 
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('adminScreen').style.display = 'block';
+                document.getElementById('repoBadge').textContent = GITHUB_REPO;
                 
                 await loadFromGitHub();
                 renderAdminItems();
                 renderAdminDevices();
                 updateViewsDisplay();
-                
-                document.getElementById('deviceQuestionInput').value = appSettings.deviceQuestion || 'What device are you using?';
-                document.getElementById('offerDescriptionInput').value = appSettings.offerDescription || 'Complete this offer to unlock your item';
-                document.getElementById('offerButtonTextInput').value = appSettings.offerButtonText || 'Complete Offer';
-                document.getElementById('timerDurationInput').value = appSettings.timerDuration || 40;
-                document.getElementById('unlockTitleInput').value = appSettings.unlockTitle || 'Content unlocked!';
-                document.getElementById('rewardLabelInput').value = appSettings.rewardLabel || 'Your Reward';
-                document.getElementById('rewardButtonNameInput').value = appSettings.rewardButtonName || 'Get Your Reward';
-                document.getElementById('rewardButtonLinkInput').value = appSettings.rewardButtonLink || 'https://example.com/reward';
-                
+                populateSettings();
                 setupEventListeners();
                 
             } catch(e) {
-                document.getElementById('loginError').style.display = 'block';
+                console.error('Login error:', e);
+                errEl.textContent = '❌ ' + (e.message || 'Login failed');
+                errEl.style.display = 'block';
+                btn.textContent = '🔐 Login';
+                btn.disabled = false;
             }
         }
 
